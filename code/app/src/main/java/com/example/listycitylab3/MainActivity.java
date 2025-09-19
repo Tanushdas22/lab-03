@@ -1,7 +1,6 @@
 package com.example.listycitylab3;
 
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements AddCityFragment.AddCityDialogListener {
 
@@ -23,6 +21,12 @@ public class MainActivity extends AppCompatActivity implements AddCityFragment.A
         cityAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void editCity(int position, City city) {
+        dataList.get(position).setName(city.getName());
+        dataList.get(position).setProvince(city.getProvince());
+        cityAdapter.notifyDataSetChanged();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,20 +36,25 @@ public class MainActivity extends AppCompatActivity implements AddCityFragment.A
         String[] cities = { "Edmonton", "Vancouver", "Toronto" };
         String[] provinces = { "AB", "BC", "ON" };
 
-
-        dataList = new ArrayList<City>();
+        dataList = new ArrayList<>();
         for (int i = 0; i < cities.length; i++) {
             dataList.add(new City(cities[i], provinces[i]));
         }
-
 
         cityList = findViewById(R.id.city_list);
         cityAdapter = new CityArrayAdapter(this, dataList);
         cityList.setAdapter(cityAdapter);
 
+        // Click to edit existing city
+        cityList.setOnItemClickListener((parent, view, position, id) -> {
+            City city = dataList.get(position);
+            AddCityFragment.newInstance(city.getName(), city.getProvince(), position)
+                    .show(getSupportFragmentManager(), "Edit City");
+        });
+
         FloatingActionButton fab = findViewById(R.id.button_add_city);
         fab.setOnClickListener(v -> {
-            new AddCityFragment().show(getSupportFragmentManager(), "Add City");
+            AddCityFragment.newInstance().show(getSupportFragmentManager(), "Add City");
         });
     }
 }
